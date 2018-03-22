@@ -136,7 +136,7 @@ if __name__ == '__main__':
     mysheet = pd.DataFrame()
     for n in range(1,4):
         # urlbase = 'https://stocks.finance.yahoo.co.jp/stocks/history/?code=6083.T'
-        urlbase = 'https://info.finance.yahoo.co.jp/history/?code=6083.T'
+        urlbase = 'https://info.finance.yahoo.co.jp/history/?code=4611.T'
         urlbase = urlbase + '&p=' + str(n)
         newsheet = get_price_list(urlbase)
         if n > 0:
@@ -147,7 +147,8 @@ if __name__ == '__main__':
     mysheet = mysheet.reset_index(drop=True)
 
     mysheet['updown_today'] = mysheet['EndPrice'] > mysheet['StartPrice']
-    mysheet['updown_yestoday'] = 0.0
+    mysheet['updown_yestoday'] = False
+    mysheet['updown_value'] = 0
     for name in ['StartPrice','HighPrice','LowPrice','EndPrice','Count','FinalPrice']:
         mysheet[name] = mysheet[name].apply(lambda x: int(x.replace(',', '')))
 
@@ -155,7 +156,37 @@ if __name__ == '__main__':
     for index , row in mysheet.iterrows():
         if index < mysheet.shape[0] -1 :
             next_row = mysheet.loc[[index+1]]
-            mysheet.set_value(index, 'updown_yestoday',  row['StartPrice'] - next_row['FinalPrice'].values)
+            mysheet.set_value(index, 'updown_value',  abs(row['StartPrice'] - next_row['FinalPrice'].values))
+            if next_row['FinalPrice'].values < row['StartPrice']:
+                mysheet.set_value(index, 'updown_yestoday',  True)
+
+    mysheet['buy_force'] = 0
+    for index , row in mysheet.iterrows():
+        if row['updown_today'] == True:
+            s1 = row['HighPrice'] - row['LowPrice']
+        else :
+            s1 = row['HighPrice'] - row['LowPrice'] -row['StartPrice'] + row['FinalPrice']
+
+        s2 = 0
+        if row['updown_yestoday'] == True:
+            s2 = row['updown_value']
+
+        mysheet.set_value(index, 'buy_force',  s1+s2)
+
+
+    mysheet['sell_force'] = 0
+    for index , row in mysheet.iterrows():
+        if row['updown_today'] == False:
+            s1 = row['HighPrice'] - row['LowPrice']
+        else :
+            s1 = row['HighPrice'] - row['LowPrice'] +row['StartPrice'] - row['FinalPrice']
+
+        s2 = 0
+        if row['updown_yestoday'] == False:
+            s2 = row['updown_value']
+
+        mysheet.set_value(index, 'sell_force',  s1+s2)
+
 
 
     print (mysheet)
