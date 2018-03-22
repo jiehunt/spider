@@ -191,6 +191,20 @@ if __name__ == '__main__':
     mysheet['buy_number'] = mysheet['buy_force'] * mysheet['Count'] / (mysheet['buy_force'] + mysheet['sell_force'])
     mysheet['sell_number'] = mysheet['sell_force'] * mysheet['Count'] / (mysheet['buy_force'] + mysheet['sell_force'])
 
+    mysheet['sell_press'] = 0.0
+
+    for index, row in mysheet.iterrows():
+        if index + 19 < mysheet.shape[0] :
+            buy_1 =pd.DataFrame( mysheet['buy_number'][index:index+20] )
+            buy_total = buy_1.apply(lambda x: x.sum())
+            buy_t = buy_total['buy_number']
+
+            sell_1 =pd.DataFrame( mysheet['sell_number'][index:index+20] )
+            sell_total = sell_1.apply(lambda x: x.sum())
+            sell_t = sell_total['sell_number']
+
+            mysheet.set_value(index, 'sell_press',  float(sell_t/buy_t))
+
     print (mysheet)
     """
     file.write ("Recommend Stock is :")
