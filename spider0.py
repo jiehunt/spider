@@ -188,6 +188,8 @@ if __name__ == '__main__':
         mysheet.set_value(index, 'sell_force',  s1+s2)
 
 
+    mysheet['buy_number'] = mysheet['buy_force'] * mysheet['Count'] / (mysheet['buy_force'] + mysheet['sell_force'])
+    mysheet['sell_number'] = mysheet['sell_force'] * mysheet['Count'] / (mysheet['buy_force'] + mysheet['sell_force'])
 
     print (mysheet)
     """
