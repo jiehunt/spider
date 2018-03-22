@@ -3,6 +3,7 @@ import requests
 import urllib
 import urllib3
 import re
+import numpy as np
 from bs4 import BeautifulSoup
 import string
 from locale import *
@@ -114,49 +115,58 @@ def get_price_list(urlbase):
 """
 メイン関数
 """
-m_newhighlist = newhighlist()
-time.localtime(time.time())
-nowtime = time.strftime('%Y%m%d',time.localtime(time.time()))
-filename = nowtime + 'stockinfo.txt'
-file = open(filename, "w")
+if __name__ == '__main__':
+    columns=['Date','StartPrice','HighPrice','LowPrice','EndPrice','Count','FinalPrice']
+    m_newhighlist = newhighlist()
+    time.localtime(time.time())
+    nowtime = time.strftime('%Y%m%d',time.localtime(time.time()))
+    filename = nowtime + 'stockinfo.txt'
+    file = open(filename, "w")
 
-cnt = 0
-newhigh = ['2226','2384']
-urlbase = 'http://www.nikkei.com/markets/company/?scode='
-# for item in m_newhighlist.code_num:
-for item in newhigh:
-    url = urlbase + item
-    print (url)
-    # getpriceandjikasougaku(url,item)
-    cnt += 1
+    cnt = 0
+    newhigh = ['2226','2384']
+    urlbase = 'http://www.nikkei.com/markets/company/?scode='
+    # for item in m_newhighlist.code_num:
+    for item in newhigh:
+        url = urlbase + item
+        print (url)
+        # getpriceandjikasougaku(url,item)
+        cnt += 1
 
-mysheet = pd.DataFrame()
-for n in range(1,4):
-    # urlbase = 'https://stocks.finance.yahoo.co.jp/stocks/history/?code=6083.T'
-    urlbase = 'https://info.finance.yahoo.co.jp/history/?code=6083.T'
-    urlbase = urlbase + '&p=' + str(n)
-    newsheet = get_price_list(urlbase)
-    if n > 0:
-      mysheet = pd.concat((mysheet, newsheet))
-    else:
-      mysheet = newsheet
+    mysheet = pd.DataFrame()
+    for n in range(1,4):
+        # urlbase = 'https://stocks.finance.yahoo.co.jp/stocks/history/?code=6083.T'
+        urlbase = 'https://info.finance.yahoo.co.jp/history/?code=6083.T'
+        urlbase = urlbase + '&p=' + str(n)
+        newsheet = get_price_list(urlbase)
+        if n > 0:
+          mysheet = pd.concat((mysheet, newsheet))
+        else:
+          mysheet = newsheet
 
-mysheet = mysheet.reset_index(drop=True)
+    mysheet = mysheet.reset_index(drop=True)
 
-print (mysheet)
-print ( "*************")
+    mysheet['updown_today'] = mysheet['EndPrice'] > mysheet['StartPrice']
+    mysheet['updown_yestoday'] = 0.0
+
+    print ( "*************")
+    for index , row in mysheet.iterrows():
+        if index < mysheet.shape[0] -1 :
+            next_row = mysheet.loc[[index+1]]
+            mysheet.set_value(index, 'updown_yestoday',  row['StartPrice'] - next_row['FinalPrice'].values)
 
 
-"""
-file.write ("Recommend Stock is :")
-file.write ("\n")
-for item in m_newhighlist.code_num:
-    index = m_newhighlist.code_num.index(item)
-    if (m_newhighlist.stockinfo_list[index].keijyou_value > 2) and \
-        m_newhighlist.stockinfo_list[index].towyear_high == 1 and \
-        m_newhighlist.stockinfo_list[index].sougaku_value > 30000 :
-        file.write (item)
-        file.write ("\n")
-"""
+    print (mysheet)
+    """
+    file.write ("Recommend Stock is :")
+    file.write ("\n")
+    for item in m_newhighlist.code_num:
+        index = m_newhighlist.code_num.index(item)
+        if (m_newhighlist.stockinfo_list[index].keijyou_value > 2) and \
+            m_newhighlist.stockinfo_list[index].towyear_high == 1 and \
+            m_newhighlist.stockinfo_list[index].sougaku_value > 30000 :
+            file.write (item)
+            file.write ("\n")
+    """
 
-file.close()
+    file.close()
