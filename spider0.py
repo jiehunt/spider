@@ -148,6 +148,8 @@ if __name__ == '__main__':
 
     mysheet['updown_today'] = mysheet['EndPrice'] > mysheet['StartPrice']
     mysheet['updown_yestoday'] = 0.0
+    for name in ['StartPrice','HighPrice','LowPrice','EndPrice','Count','FinalPrice']:
+        mysheet[name] = mysheet[name].apply(lambda x: int(x.replace(',', '')))
 
     print ( "*************")
     for index , row in mysheet.iterrows():
