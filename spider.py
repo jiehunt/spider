@@ -9,6 +9,8 @@ import string
 from locale import *
 import os, sys
 import time
+from urllib3.exceptions import InsecureRequestWarning
+urllib3.disable_warnings(InsecureRequestWarning)
 # setlocale(LC_NUMERIC, 'English_US')
 
 #reload(sys)
