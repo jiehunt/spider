@@ -393,7 +393,8 @@ def getpriceandjikasougaku(url,code):
 m_newhighlist = newhighlist()
 time.localtime(time.time())
 nowtime = time.strftime('%Y%m%d',time.localtime(time.time()))
-filename = nowtime + 'stockinfo.txt'
+cwd = '/home/jiehunt/work/task/'
+filename = cwd + nowtime + 'stockinfo.txt'
 file = open(filename, "w")
 
 """
